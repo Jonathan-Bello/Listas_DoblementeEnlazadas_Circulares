@@ -1,0 +1,29 @@
+# Compilación
+bin/
+obj/
+out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Archivos de depuración y temporales
+*.pdb
+*.cache
+*.tmp
+*.log
+
+# Paquetes NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
