@@ -3,7 +3,7 @@ namespace listas_dobles_circulares_profe {
    // Nodo simple: Listas enlazadas
     class Nodo {
         public int valor;
-        public Nodo sig;
+        public Nodo? sig;
 
         public Nodo(int valor) {
             this.valor = valor;
@@ -13,8 +13,8 @@ namespace listas_dobles_circulares_profe {
 
     class NodoDoble {
         public int valor;
-        public NodoDoble sig;
-        public NodoDoble ant;
+        public NodoDoble? sig;
+        public NodoDoble? ant;
 
         public NodoDoble(int valor) {
             this.valor = valor;
