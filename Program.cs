@@ -1,138 +1,137 @@
-﻿using listas_dobles_circulares_profe;
+﻿using System;
+using System.Collections.Generic;
 
-Nodo? cabeza = null;
-int opcion;
+var lista = new ListaEnlazada();
+bool continuar = true;
 
-do
+var acciones = new Dictionary<int, Action>
 {
-	Console.WriteLine("\n--- Lista enlazada simple ---");
-	Console.WriteLine("1. Agregar valor");
-	Console.WriteLine("2. Mostrar lista");
-	Console.WriteLine("3. Buscar valor");
-	Console.WriteLine("4. Eliminar valor");
-	Console.WriteLine("0. Salir");
-	opcion = LeerEntero("Elige una opción: ");
+    [1] = () => lista.Agregar(Pedir("Valor que deseas agregar: ")),
+    [2] = () => Console.WriteLine(lista.ComoTexto()),
+    [3] = () =>
+    {
+        int v = Pedir("Valor que deseas buscar: ");
+        Console.WriteLine(lista.Contiene(v)
+            ? $"Sí, el {v} se encuentra en la lista."
+            : $"No, el {v} no se encuentra en la lista.");
+    },
+    [4] = () =>
+    {
+        int v = Pedir("Valor que deseas eliminar: ");
+        Console.WriteLine(lista.Quitar(v)
+            ? $"Se quitó el {v} de la lista."
+            : lista.EstaVacia
+                ? "La lista está vacía."
+                : $"El {v} no existe en la lista.");
+    },
+    [0] = () =>
+    {
+        Console.WriteLine("Hasta luego.");
+        continuar = false;
+    }
+};
 
-	switch (opcion)
-	{
-		case 1:
-			Agregar(LeerEntero("Valor que deseas agregar: "));
-			break;
-		case 2:
-			Mostrar();
-			break;
-		case 3:
-			int buscado = LeerEntero("Valor que deseas buscar: ");
-			Console.WriteLine(Buscar(buscado)
-				? $"El valor {buscado} está en la lista."
-				: $"El valor {buscado} no está en la lista.");
-			break;
-		case 4:
-			Eliminar(LeerEntero("Valor que deseas eliminar: "));
-			break;
-		case 0:
-			Console.WriteLine("Programa finalizado.");
-			break;
-		default:
-			Console.WriteLine("Opción no válida.");
-			break;
-	}
-} while (opcion != 0);
-
-int LeerEntero(string mensaje)
+while (continuar)
 {
-	while (true)
-	{
-		Console.Write(mensaje);
-		if (int.TryParse(Console.ReadLine(), out int valor))
-		{
-			return valor;
-		}
+    Console.WriteLine("""
 
-		Console.WriteLine("Ingresa un número entero válido.");
-	}
+        === MENÚ: Lista enlazada simple ===
+        1) Agregar valor
+        2) Mostrar lista
+        3) Buscar valor
+        4) Eliminar valor
+        0) Salir
+        """);
+
+    int eleccion = Pedir("Opción: ");
+
+    if (acciones.TryGetValue(eleccion, out Action? accion))
+        accion();
+    else
+        Console.WriteLine("Esa opción no existe.");
 }
 
-void Agregar(int valor)
+static int Pedir(string texto)
 {
-	Nodo nuevo = new(valor);
-	if (cabeza is null)
-	{
-		cabeza = nuevo;
-		return;
-	}
-
-	Nodo actual = cabeza;
-	while (actual.sig is not null)
-	{
-		actual = actual.sig;
-	}
-
-	actual.sig = nuevo;
+    int numero;
+    Console.Write(texto);
+    while (!int.TryParse(Console.ReadLine(), out numero))
+    {
+        Console.Write("Entrada inválida, escribe un entero: ");
+    }
+    return numero;
 }
 
-void Mostrar()
+class Elemento
 {
-	if (cabeza is null)
-	{
-		Console.WriteLine("La lista está vacía.");
-		return;
-	}
+    public int Dato;
+    public Elemento? Siguiente;
 
-	Nodo? actual = cabeza;
-	Console.Write("Inicio -> ");
-	while (actual is not null)
-	{
-		Console.Write($"{actual.valor} -> ");
-		actual = actual.sig;
-	}
-
-	Console.WriteLine("null");
+    public Elemento(int dato) => Dato = dato;
 }
 
-bool Buscar(int valor)
+class ListaEnlazada
 {
-	Nodo? actual = cabeza;
-	while (actual is not null)
-	{
-		if (actual.valor == valor)
-		{
-			return true;
-		}
+    private Elemento? _primero;
+    private Elemento? _ultimo;
 
-		actual = actual.sig;
-	}
+    public bool EstaVacia => _primero == null;
 
-	return false;
-}
+    public void Agregar(int dato)
+    {
+        var nuevo = new Elemento(dato);
 
-void Eliminar(int valor)
-{
-	if (cabeza is null)
-	{
-		Console.WriteLine("La lista está vacía.");
-		return;
-	}
+        if (_ultimo == null)
+        {
+            _primero = _ultimo = nuevo;
+        }
+        else
+        {
+            _ultimo.Siguiente = nuevo;
+            _ultimo = nuevo;
+        }
+    }
 
-	if (cabeza.valor == valor)
-	{
-		cabeza = cabeza.sig;
-		Console.WriteLine($"Se eliminó el valor {valor}.");
-		return;
-	}
+    private IEnumerable<int> Recorrer()
+    {
+        for (var e = _primero; e != null; e = e.Siguiente)
+            yield return e.Dato;
+    }
 
-	Nodo? anterior = cabeza;
-	while (anterior.sig is not null && anterior.sig.valor != valor)
-	{
-		anterior = anterior.sig;
-	}
+    public string ComoTexto()
+    {
+        if (EstaVacia) return "La lista está vacía.";
+        return "Inicio -> " + string.Join(" -> ", Recorrer()) + " -> null";
+    }
 
-	if (anterior.sig is null)
-	{
-		Console.WriteLine($"El valor {valor} no está en la lista.");
-		return;
-	}
+    public bool Contiene(int dato)
+    {
+        foreach (int d in Recorrer())
+            if (d == dato) return true;
+        return false;
+    }
 
-	anterior.sig = anterior.sig.sig;
-	Console.WriteLine($"Se eliminó el valor {valor}.");
+    public bool Quitar(int dato)
+    {
+        Elemento? previo = null;
+        Elemento? actual = _primero;
+
+        while (actual != null && actual.Dato != dato)
+        {
+            previo = actual;
+            actual = actual.Siguiente;
+        }
+
+        if (actual == null) return false;
+
+        if (previo == null)
+            _primero = actual.Siguiente;
+        else
+            previo.Siguiente = actual.Siguiente;
+
+        if (actual == _ultimo)
+            _ultimo = previo;
+
+        return true;
+    }
 }
