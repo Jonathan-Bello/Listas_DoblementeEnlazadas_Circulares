@@ -1,4 +1,4 @@
-namespace listas_dobles_circulares_profe {
+namespace listas_dobles_circulares_alumno {
 
    // Nodo simple: Listas enlazadas
     class Nodo {
